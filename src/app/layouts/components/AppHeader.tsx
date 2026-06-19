@@ -15,6 +15,7 @@ import { useTheme } from '@/app/providers/theme/hooks/useTheme';
 import { useNavigate } from 'react-router-dom';
 import UserAvatar from '@/shared/components/avatar/UserAvatar';
 
+
 const { Header } = Layout;
 
 interface AppHeaderProps {

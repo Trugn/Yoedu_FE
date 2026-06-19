@@ -1,6 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 
-import AppInit from '../init/AppInit';
+import RootLayout from '../layouts/RootLayout';
 
 import AuthLayout from '../layouts/AuthLayout';
 
@@ -18,67 +18,68 @@ import RegisterPage from '@/features/auth/pages/RegisterPage';
 //import EnrollmentPage from '@/features/enrollments/pages/EnrollmentPage';
 
 export const router = createBrowserRouter([
-    /******************** AUTH *********************/
     {
-        element: <ProtectedRoute requireAuth={false} />,
+        element: <RootLayout />,
         children: [
+            /******************** AUTH *********************/
             {
-                path: '/auth',
-                element: <AuthLayout />,
+                element: <ProtectedRoute requireAuth={false} />,
                 children: [
                     {
-                        path: 'login',
-                        element: <LoginPage />,
-                    },
-                    {
-                        path: 'register',
-                        element: <RegisterPage />,
+                        path: '/auth',
+                        element: <AuthLayout />,
+                        children: [
+                            {
+                                path: 'login',
+                                element: <LoginPage />,
+                            },
+                            {
+                                path: 'register',
+                                element: <RegisterPage />,
+                            },
+                        ],
                     },
                 ],
             },
-        ],
-    },
 
-    /******************** MAIN *********************/
-    {
-         element: <ProtectedRoute />,
-        children: [
+            /******************** MAIN *********************/
             {
-                path: '/',
-                element: (
-                    <AppInit>
-                        <MainLayout />
-                    </AppInit>
-                ),
+                element: <ProtectedRoute />,
                 children: [
                     {
-                        index: true,
-                        element: (
-                            <div className="p-8">
-                                <h1 className="text-3xl font-bold">Trang chủ</h1>
-                            </div>
-                        ),
-                        //element: <DashboardPage />,
-                    },
-                    {
-                        path: 'profile',
-                        //element: <UserProfilePage />,
-                    },
-                    {
-                        path: 'students',
-                        //element: <StudentPage />,
-                    },
-                    {
-                        path: 'teachers',
-                        //element: <TeacherPage />,
-                    },
-                    {
-                        path: 'courses',
-                        //element: <CoursePage />,
-                    },
-                    {
-                        path: 'enrollments',
-                        //  element: <EnrollmentPage />,
+                        path: '/',
+                        element: <MainLayout />,
+                        children: [
+                            {
+                                index: true,
+                                element: (
+                                    <div className="p-8">
+                                        <h1 className="text-3xl font-bold">Trang chủ</h1>
+                                    </div>
+                                ),
+                                //element: <DashboardPage />,
+                            },
+                            {
+                                path: 'profile',
+                                //element: <UserProfilePage />,
+                            },
+                            {
+                                path: 'students',
+                                //element: <StudentPage />,
+                            },
+                            {
+                                path: 'teachers',
+                                //element: <TeacherPage />,
+                            },
+                            {
+                                path: 'courses',
+                                //element: <CoursePage />,
+                            },
+                            {
+                                path: 'enrollments',
+                                //  element: <EnrollmentPage />,
+                            },
+                        ],
                     },
                 ],
             },

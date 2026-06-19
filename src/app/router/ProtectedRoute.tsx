@@ -7,7 +7,12 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requireAuth = true }) => {
-  const { accessToken } = useAppSelector((state) => state.auth);
+  const { accessToken, initialized } = useAppSelector((state) => state.auth);
+
+  // Chưa khởi tạo xong => không render gì
+  if (!initialized) {
+    return null;
+  }
 
   // Route cần login
   if (requireAuth && !accessToken) {

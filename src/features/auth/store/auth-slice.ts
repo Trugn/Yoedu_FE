@@ -4,6 +4,8 @@ import { loginThunk, registerThunk, getMeThunk } from './auth-thunk';
 
 interface AuthState {
     user: User | null;
+    accessToken: string | null;
+    refreshToken: string | null;
     isLoading: boolean;
     error: string | null;
     initialized: boolean;
@@ -11,6 +13,8 @@ interface AuthState {
 
 const initialState: AuthState = {
     user: null,
+    accessToken: null,
+    refreshToken: null,
     isLoading: false,
     error: null,
     initialized: false,
@@ -25,12 +29,22 @@ const authSlice = createSlice({
         },
         logout: (state) => {
             state.user = null;
+            state.accessToken = null;
+            state.refreshToken = null;
 
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
         },
         markInitialized: (state) => {
             state.initialized = true;
+        },
+        restoreToken: (state) => {
+            // Khôi phục token từ localStorage vào Redux state ngay
+            const accessToken = localStorage.getItem('accessToken');
+            const refreshToken = localStorage.getItem('refreshToken');
+            
+            if (accessToken) state.accessToken = accessToken;
+            if (refreshToken) state.refreshToken = refreshToken;
         },
     },
     extraReducers: (builder) => {
@@ -44,6 +58,8 @@ const authSlice = createSlice({
         state.isLoading = false;
 
         state.user = action.payload.user;
+        state.accessToken = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
 
         localStorage.setItem('accessToken', action.payload.accessToken);
         localStorage.setItem('refreshToken', action.payload.refreshToken);
@@ -74,7 +90,8 @@ const authSlice = createSlice({
         state.isLoading = false;
 
         state.user = action.payload;
-
+        
+        // Token đã được restoreToken set, không cần set lại
         state.initialized = true;
       })
       .addCase(getMeThunk.rejected, (state, action) => {
@@ -89,5 +106,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError, markInitialized } = authSlice.actions;
+export const { logout, clearError, markInitialized, restoreToken } = authSlice.actions;
 export default authSlice.reducer;
