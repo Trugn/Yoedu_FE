@@ -1,26 +1,16 @@
-import { Button, Col, Form, Tabs } from 'antd';
-import ModalCustom from '@/shared/components/modal/ModalCustom';
-import { useState, useEffect } from 'react';
-import { FormFieldType, type FormFieldTypeKey } from '../../types/form-field-type';
-import { useNotification } from '../../hooks/useNotification';
-import RowCustom from '../row/RowCustom';
-import DatePickerCustom from '../datepicker/DatePickerCustom';
-import type { UserRole } from '@/features/users/types/user-role-type';
-import { useAppSelector } from '@/app/redux/hooks';
+import { useEffect, useState } from 'react';
 import { FormModalMode, type FormModalModeType } from '../../types/form-modal-mode-type';
-import SelectCustom from '../select/SelectCustom';
-import InputCustom from '../input/InputCustom';
-import InputNumberCustom from '../input/InputNumberCustom';
-import InputPasswordCustom from '../input/InputPasswordCustom';
-import InputTextAreaCustom from '../input/InputTextAreaCustom';
-import UploadImageCustom from '../upload/UploadImageCustom';
-import SelectFetchCustom from '../select/SelectFetchCustom';
-import TimePickerCustom from '../timepicker/TimePickerCustom';
+import ModalCustom from './ModalCustom';
+import { useNotification } from '@/shared/hooks/useNotification';
+import { Button, Form, Tabs } from 'antd';
 import { formatFormValues } from '@/shared/utils/form';
+import DynamicForm from '../form/DynamicForm';
+import type { UserRole } from '@/features/users/types/user-role-type';
+import type { FormFieldTypeKey } from '@/shared/types/form-field-type';
 
 export interface FormContext {
   role: UserRole;
-  mode?: FormModalModeType;
+  mode: FormModalModeType;
 }
 
 export interface FormField<T> {
@@ -34,6 +24,8 @@ export interface FormField<T> {
 
   disabled?: any;
 
+  hidden?: any;
+
   rules?: any[];
 
   options?: {
@@ -46,6 +38,10 @@ export interface FormField<T> {
   col?: number;
 
   props?: any;
+
+  icon?: any;
+
+  onChange?: (value: any, options: any, form: any) => void;
 }
 
 export interface SectionForm<T> {
@@ -73,7 +69,7 @@ interface ModalFormCustomProps<T> {
 
   onSuccess: () => void;
 
-  onSubmit: (values: T) => Promise<void>;
+  onSubmit?: (values: T) => Promise<void>;
 }
 
 const ModalFormCustom = <T,>({
@@ -87,13 +83,17 @@ const ModalFormCustom = <T,>({
   onSubmit,
   disabled,
 }: ModalFormCustomProps<T>) => {
-  const { user } = useAppSelector((state) => state.auth);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const { showNotification } = useNotification();
 
   useEffect(() => {
-    if (open && initialValues) {
+    if (!open) {
+      form.resetFields();
+      return;
+    }
+
+    if (initialValues) {
       const formattedValues = formatFormValues(initialValues as T, sections);
 
       form.setFieldsValue(formattedValues);
@@ -106,7 +106,9 @@ const ModalFormCustom = <T,>({
 
       const formattedValues = formatFormValues(values, sections);
 
-      await onSubmit(formattedValues);
+      if (onSubmit) {
+        await onSubmit(formattedValues);
+      }
 
       showNotification('success', 'Thành công', 'Dữ liệu đã được lưu thành công');
 
@@ -126,11 +128,6 @@ const ModalFormCustom = <T,>({
     }
   };
 
-  const handleCancel = () => {
-    form.resetFields();
-    onCancel();
-  };
-
   return (
     <ModalCustom
       open={open}
@@ -141,7 +138,7 @@ const ModalFormCustom = <T,>({
             ? `Cập nhật ${title.toLowerCase()}`
             : `Thông tin ${title.toLowerCase()}`
       }
-      onCancel={handleCancel}
+      onCancel={onCancel}
       footer={null}
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
@@ -149,107 +146,7 @@ const ModalFormCustom = <T,>({
           items={sections.map((section) => ({
             key: section.key,
             label: section.label,
-            children: (
-              <RowCustom>
-                {section.fields
-                  .filter((field) => mode === FormModalMode.CREATE || field.name !== 'password') // Nếu EDIT, VIEW THÌ KHÔNG HIỂN THỊ TRƯỜNG PASSWORD
-                  .map((field) => (
-                    <Col key={field.name as string} span={field.col || 12}>
-                      <Form.Item
-                        name={field.name as string}
-                        label={field.label}
-                        rules={field.rules}
-                      >
-                        {(() => {
-                          const isDisabled =
-                            typeof field.disabled === 'function'
-                              ? field.disabled({ role: user?.role as UserRole, mode })
-                              : field.disabled;
-
-                          switch (field.type) {
-                            case FormFieldType.Input:
-                              return (
-                                <InputCustom
-                                  placeholder={field.placeholder}
-                                  disabled={isDisabled || disabled}
-                                  {...field.props}
-                                />
-                              );
-                            case FormFieldType.ImageUpload:
-                              return (
-                                <UploadImageCustom
-                                  value={form.getFieldValue(field.name)}
-                                  onChange={(value) => form.setFieldsValue({ [field.name]: value })}
-                                  {...field.props}
-                                />
-                              );
-                            case FormFieldType.InputNumber:
-                              return (
-                                <InputNumberCustom
-                                  placeholder={field.placeholder}
-                                  disabled={isDisabled || disabled}
-                                  {...field.props}
-                                />
-                              );
-                            case FormFieldType.InputPassword:
-                              return (
-                                <InputPasswordCustom
-                                  placeholder={field.placeholder}
-                                  disabled={isDisabled || disabled}
-                                  {...field.props}
-                                />
-                              );
-                            case FormFieldType.Select:
-                              return (
-                                <SelectCustom
-                                  placeholder={field.placeholder}
-                                  options={field.options}
-                                  disabled={isDisabled || disabled}
-                                  {...field.props}
-                                />
-                              );
-                            case FormFieldType.SelectFetch:
-                              return (
-                                <SelectFetchCustom
-                                  placeholder={field.placeholder}
-                                  fetchOptions={field.fetchOptions}
-                                  disabled={isDisabled || disabled}
-                                  {...field.props}
-                                />
-                              );
-                            case FormFieldType.DatePicker:
-                              return (
-                                <DatePickerCustom
-                                  placeholder={field.placeholder}
-                                  disabled={isDisabled || disabled}
-                                  {...field.props}
-                                />
-                              );
-                            case FormFieldType.TimePicker:
-                              return (
-                                <TimePickerCustom
-                                  placeholder={field.placeholder}
-                                  disabled={isDisabled || disabled}
-                                  {...field.props}
-                                />
-                              );
-                            case FormFieldType.TextArea:
-                              return (
-                                <InputTextAreaCustom
-                                  placeholder={field.placeholder}
-                                  disabled={isDisabled || disabled}
-                                  {...field.props}
-                                />
-                              );
-                            default:
-                              return null;
-                          }
-                        })()}
-                      </Form.Item>
-                    </Col>
-                  ))}
-              </RowCustom>
-            ),
+            children: <DynamicForm<T> fields={section.fields} disabled={disabled} mode={mode} />,
           }))}
         />
 

@@ -12,7 +12,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, extra }) => {
   return (
     <div className="mb-4 flex items-start justify-between gap-4">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+        <h1 className="text-3xl font-bold">{title}</h1>
 
         {subtitle && <p className="mt-1 text-gray-500">{subtitle}</p>}
       </div>

@@ -19,7 +19,7 @@ interface useTableProps<P> {
 
   activeApi?: (id: string) => Promise<any>;
 
-  unActiveApi?: (id: string) => Promise<any>;
+  inActiveApi?: (id: string) => Promise<any>;
 
   initialFilters?: Partial<P>;
 }
@@ -28,7 +28,7 @@ const useTable = <T, P>({
   fetchApi,
   removeApi,
   activeApi,
-  unActiveApi,
+  inActiveApi,
   initialFilters = {},
 }: useTableProps<P>) => {
   const { showNotification } = useNotification();
@@ -147,11 +147,11 @@ const useTable = <T, P>({
     }
   };
 
-  const handleUnActive = async (id: string) => {
-    if (!unActiveApi) return;
+  const handleInActive = async (id: string) => {
+    if (!inActiveApi) return;
 
     try {
-      const res = await unActiveApi(id);
+      const res = await inActiveApi(id);
 
       showNotification('success', 'Chuyển trạng thái', res.message || 'Ngưng hoạt động thành công');
 
@@ -192,7 +192,7 @@ const useTable = <T, P>({
 
     handleActive,
 
-    handleUnActive,
+    handleInActive,
 
     refetch: fetchData,
   };

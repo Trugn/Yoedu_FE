@@ -1,8 +1,13 @@
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { FormFieldType } from '@/shared/types/form-field-type';
+import {
+  formatDateTimeQuery,
+  formatDateToPicker,
+  formatDateToQuery,
+  formatTimeToPicker,
+  formatTimeToQuery,
+} from './date';
 import type { SectionForm } from '../components/modal/ModalFormCustom';
-import { FORMAT_TIME } from '../constants/format-date';
-import { formatDateToPicker, formatTimeToPicker } from './date';
 
 export const formatFormValues = <T>(values: T, sections: SectionForm<T>[]): T => {
   const formattedValues: Record<string, unknown> = {
@@ -18,12 +23,17 @@ export const formatFormValues = <T>(values: T, sections: SectionForm<T>[]): T =>
       switch (field.type) {
         case FormFieldType.DatePicker:
           formattedValues[field.name as string] = dayjs.isDayjs(value)
-            ? value.toISOString()
+            ? formatDateToQuery(value as Dayjs)
+            : formatDateToPicker(value as string);
+          break;
+        case FormFieldType.DateTimePicker:
+          formattedValues[field.name as string] = dayjs.isDayjs(value)
+            ? formatDateTimeQuery(value as Dayjs)
             : formatDateToPicker(value as string);
           break;
         case FormFieldType.TimePicker:
           formattedValues[field.name as string] = dayjs.isDayjs(value)
-            ? value.format(FORMAT_TIME)
+            ? formatTimeToQuery(value as Dayjs)
             : formatTimeToPicker(value as string);
           break;
         default:

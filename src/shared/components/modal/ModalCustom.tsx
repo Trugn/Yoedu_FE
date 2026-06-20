@@ -12,6 +12,8 @@ interface ModalCustomProps {
   footer?: React.ReactNode;
 
   destroyOnHidden?: boolean;
+
+  isCentered?: boolean;
 }
 
 const ModalCustom = ({
@@ -22,6 +24,7 @@ const ModalCustom = ({
   onCancel,
   footer = null,
   destroyOnHidden = true,
+  isCentered = true,
 }: ModalCustomProps) => {
   return (
     <Modal
@@ -31,7 +34,7 @@ const ModalCustom = ({
       footer={footer}
       onCancel={onCancel}
       destroyOnHidden={destroyOnHidden}
-      centered
+      centered={isCentered}
     >
       {children}
     </Modal>

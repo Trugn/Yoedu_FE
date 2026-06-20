@@ -7,6 +7,7 @@ export const FormFieldType = {
   TimePicker: 'timePicker',
   Checkbox: 'checkbox',
   DatePicker: 'datePicker',
+  DateTimePicker: 'dateTimePicker',
   ImageUpload: 'imageUpload',
   TextArea: 'textArea',
 } as const;

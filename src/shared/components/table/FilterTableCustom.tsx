@@ -9,7 +9,15 @@ import SelectCustom from '../select/SelectCustom';
 import DatePickerCustom from '../datepicker/DatePickerCustom';
 import CardCustom from '../card/CardCustom';
 import SelectFetchCustom from '../select/SelectFetchCustom';
-import { formatDateToPicker, formatDateToQuery } from '@/shared/utils/date';
+import {
+  formatDateToPicker,
+  formatDateToQuery,
+  formatTimeToPicker,
+  formatTimeToQuery,
+} from '@/shared/utils/date';
+import TimePickerCustom from '../timepicker/TimePickerCustom';
+import { useAppSelector } from '@/app/redux/hooks';
+import type { UserRole } from '@/features/users/types/user-role-type';
 
 export interface DataFilter {
   name: string;
@@ -19,6 +27,8 @@ export interface DataFilter {
   type: FormFieldTypeKey;
 
   placeholder?: string;
+
+  hidden?: any;
 
   options?: {
     label: string;
@@ -47,6 +57,8 @@ const FilterTableCustom = ({
   onReset,
   onSubmit,
 }: FilterTableCustomProps) => {
+  const { user } = useAppSelector((state) => state.auth);
+
   const handleChange = (name: string, value: any) => {
     onChange({
       ...values,
@@ -65,53 +77,72 @@ const FilterTableCustom = ({
           </div>
 
           <div className="flex w-full flex-wrap">
-            {dataFilters.map((filter) => (
-              <Col span={8} key={filter.name} className="mb-4">
-                {(() => {
-                  switch (filter.type) {
-                    case FormFieldType.Input:
-                      return (
-                        <InputCustom
-                          placeholder={filter.placeholder}
-                          value={values[filter.name]}
-                          onChange={(e) => handleChange(filter.name, e.target.value)}
-                        />
-                      );
-                    case FormFieldType.Select:
-                      return (
-                        <SelectCustom
-                          allowClear
-                          placeholder={filter.placeholder}
-                          options={filter.options}
-                          value={values[filter.name]}
-                          onChange={(value) => handleChange(filter.name, value)}
-                        />
-                      );
-                    case FormFieldType.SelectFetch:
-                      return (
-                        <SelectFetchCustom
-                          placeholder={filter.placeholder}
-                          fetchOptions={filter.fetchOptions}
-                          value={values[filter.name]}
-                          onChange={(value) => handleChange(filter.name, value)}
-                        />
-                      );
-                    case FormFieldType.DatePicker:
-                      return (
-                        <DatePickerCustom
-                          placeholder={filter.placeholder}
-                          value={formatDateToPicker(values[filter.name])}
-                          onChange={(value) =>
-                            handleChange(filter.name, formatDateToQuery(value as Dayjs))
-                          }
-                        />
-                      );
-                    default:
-                      return null;
-                  }
-                })()}
-              </Col>
-            ))}
+            {dataFilters
+              .filter((field) => {
+                const isHidden =
+                  typeof field.hidden === 'function'
+                    ? field.hidden({ role: user?.role as UserRole })
+                    : field.hidden;
+
+                return !isHidden;
+              })
+              .map((filter) => (
+                <Col span={8} key={filter.name} className="mb-4">
+                  {(() => {
+                    switch (filter.type) {
+                      case FormFieldType.Input:
+                        return (
+                          <InputCustom
+                            placeholder={filter.placeholder}
+                            value={values[filter.name]}
+                            onChange={(e) => handleChange(filter.name, e.target.value)}
+                          />
+                        );
+                      case FormFieldType.Select:
+                        return (
+                          <SelectCustom
+                            allowClear
+                            placeholder={filter.placeholder}
+                            options={filter.options}
+                            value={values[filter.name]}
+                            onChange={(value) => handleChange(filter.name, value)}
+                          />
+                        );
+                      case FormFieldType.SelectFetch:
+                        return (
+                          <SelectFetchCustom
+                            placeholder={filter.placeholder}
+                            fetchOptions={filter.fetchOptions}
+                            value={values[filter.name]}
+                            onChange={(value) => handleChange(filter.name, value)}
+                          />
+                        );
+                      case FormFieldType.DatePicker:
+                        return (
+                          <DatePickerCustom
+                            placeholder={filter.placeholder}
+                            value={formatDateToPicker(values[filter.name]) as Dayjs}
+                            onChange={(value) =>
+                              handleChange(filter.name, formatDateToQuery(value as Dayjs))
+                            }
+                          />
+                        );
+                      case FormFieldType.TimePicker:
+                        return (
+                          <TimePickerCustom
+                            placeholder={filter.placeholder}
+                            value={formatTimeToPicker(values[filter.name]) as Dayjs}
+                            onChange={(value) =>
+                              handleChange(filter.name, formatTimeToQuery(value as Dayjs))
+                            }
+                          />
+                        );
+                      default:
+                        return null;
+                    }
+                  })()}
+                </Col>
+              ))}
           </div>
 
           <div className="flex justify-center">

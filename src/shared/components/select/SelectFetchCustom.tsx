@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Select, Spin } from 'antd';
 import type { SelectProps } from 'antd';
+import SelectCustom from './SelectCustom';
 
 export interface SelectFetchCustomProps extends SelectProps {
   fetchOptions?: () => Promise<any>;
+  onChange?: (value: any, options: any) => void;
 }
 
-const SelectFetchCustom: React.FC<SelectFetchCustomProps> = ({ fetchOptions, ...props }) => {
+const SelectFetchCustom: React.FC<SelectFetchCustomProps> = ({
+  fetchOptions,
+  onChange,
+  ...props
+}) => {
   const [options, setOptions] = useState<SelectProps['options']>([]);
   const [loading, setLoading] = useState(false);
 
@@ -27,12 +32,10 @@ const SelectFetchCustom: React.FC<SelectFetchCustomProps> = ({ fetchOptions, ...
   }, []);
 
   return (
-    <Select
-      showSearch={{ optionFilterProp: 'label' }}
-      allowClear
-      notFoundContent={loading ? <Spin size="small" /> : 'Không có dữ liệu'}
+    <SelectCustom
+      loading={loading}
       options={options}
-      className="w-full min-h-10"
+      onChange={(value) => onChange && onChange(value, options)}
       {...props}
     />
   );
